@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  var container, camera, scene, sceneEdge, projector, renderer, mesh, meshEdge, lightCameraVisibility = false,
+  var container, camera, controls, scene, sceneEdge, projector, renderer, mesh, meshEdge, lightCameraVisibility = false,
       globalLight;
   var shadermaterial, facematerial;
   var WIDTH = $('#canvas').width();
@@ -37,50 +37,51 @@ $(document).ready(function () {
     }
     mesh = new THREE.SkinnedMesh(geometry, shadermaterial);
     mesh.scale.set(1, 1, 1);
-    mesh.position.set(-7.5, 7.5, 7.5);
+    mesh.position.set(0, 0, 0);
     meshEdge = mesh.clone();
     scene.add(mesh);
     sceneEdge.add(meshEdge);
   }
 
   function init() {
-    camera = new THREE.PerspectiveCamera(55, WIDTH / HEIGHT, 1, 1000);
+    camera = new THREE.PerspectiveCamera(55, WIDTH / HEIGHT, 0.1, 1000);
     camera.position.set(0, 0, 10);
+    controls = new THREE.OrbitControls(camera); 
     scene = new THREE.Scene();
     sceneEdge = new THREE.Scene();
     globalLight = new THREE.DirectionalLight('white');
     globalLight.position.set(1, 0, 0).normalize();
-    var sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(2, 16, 16),
-      new THREE.MeshPhongMaterial({
-        side: THREE.FrontSide, shading: THREE.FlatShading, color: 'red'
-      })
-    );
-    var cube = new THREE.Mesh(
-      new THREE.CubeGeometry(30, 30, 30),
-      new THREE.MeshPhongMaterial({
-        color: 'red'
-      })
-    );
-//    var loader = new THREE.JSONLoader(true);
-//    loader.load('mesh/sheep.js', createScene);
+    var loader = new THREE.JSONLoader(true);
+    loader.load('mesh/sheep.js', createScene);
     renderer = new THREE.WebGLRenderer({
       antialias: true
     });
     //    renderer.sortObjects = false;
     scene.add(globalLight);
     scene.add(camera);
-    scene.add(sphere);
-    scene.add(cube);
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     var canvas = document.getElementById('canvas');
-    console.log(renderer.domElement)
     canvas.appendChild(renderer.domElement);
-    renderer.render(scene, camera);
   }
 
-  function render() {
+  function render() {    
+    if (mesh) {
+      meshEdge.material.side = THREE.FrontSide;
+      mesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
+      mesh.material.uniforms.edge.value = false;
+    } 
+    renderer.render(scene, camera);
+    if (mesh) {
+      meshEdge.material.side = THREE.BackSide;
+      meshEdge.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 1);
+      meshEdge.material.uniforms.edge.value = true;
+    }
+    renderer.render(sceneEdge, camera);
+    requestAnimationFrame(render);
+  }
+   
+  function _render() {
     if (mesh) {
       if (meshFlg) {
         meshEdge.material.side = THREE.FrontSide;
@@ -96,6 +97,6 @@ $(document).ready(function () {
       }
     }
   }
-  var meshFlg = true;
   init();
+  render();
 });

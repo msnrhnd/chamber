@@ -18,7 +18,7 @@
   void main(void) {
     vec3 pos = position;
     if (edge) {
-      pos += normal * 0.04;
+      pos += normal * 0.001;
     }
     vNormal = normal;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -29,9 +29,7 @@
   uniform vec3 lightDirection;
   uniform sampler2D texture;
   uniform vec4 edgeColor;
-
   varying vec3 vNormal;
-
   void main(void) {
     if (edgeColor.a > 0.0) {
       gl_FragColor = edgeColor;
