@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta name="author" content="Masanori HONDA" />
+<meta name="copyright" content="Copyright Masanori HONDA" />
+<meta http-equiv="content-language" content="ja" />
+<link rev="made" href="mailto:honda@yodosha.co.jp" />
+<link href="css/_.css" rel="stylesheet" type="text/css" />
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+<script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="js/three.min.js"></script>
+<script type="text/javascript" src="js/OrbitControls.js"></script>
+<script type="text/javascript" src="js/spin.js"></script>
+<script type="text/javascript" src="js/jquery.spin.js"></script>
+<script type="text/javascript" src="js/_.js"></script>
+<script type="x-shader/x-vertex" id="vs">
+  uniform bool edge;
+  varying vec3 vNormal;
+  void main(void) {
+    vec3 pos = position;
+    if (edge) {
+      pos += normal * 0.04;
+    }
+    vNormal = normal;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+</script>
+<script type="x-shader/x-fragment" id="fs">
+  precision mediump float;
+  uniform vec3 lightDirection;
+  uniform sampler2D texture;
+  uniform vec4 edgeColor;
+
+  varying vec3 vNormal;
+
+  void main(void) {
+    if (edgeColor.a > 0.0) {
+      gl_FragColor = edgeColor;
+    }
+    else {
+      float diffuse = clamp(dot(vNormal, lightDirection), 0.0, 1.0);
+      vec4 smpColor = texture2D(texture, vec2(diffuse, 0.0));
+      gl_FragColor = smpColor;
+    }
+  }
+</script>
+<title>Chamber</title>
+<div id="container">
+<!--<div class="subtitle">羊土社 編集用アプリケーション（社内使用のみ）</div>-->
+<!--<h1>Chamber</h1>-->
+<div id="primary">
+<div id="control"></div>
+</div><!-- #container -->
+<footer>
+  <div>&copy; 2016- Masanori HONDA</div>
+  <div>Site admin: <a href="http://192.168.253.245/">羊土社</a></div>
+</footer>
