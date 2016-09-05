@@ -28,13 +28,11 @@ html {
   width: $main-width + px;
   padding: 2%;
   margin: 0 auto;
-  #primary {
-    #control {
-    }
-    canvas {
-      width: $canvas-width + px;
-      height: $canvas-width + px;
-    }
+  #control {
+  }
+  #canvas {
+    width: $canvas-width + px;
+    height: $canvas-width + px;
   }
 }
 

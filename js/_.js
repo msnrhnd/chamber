@@ -2,9 +2,9 @@ $(document).ready(function () {
   var container, camera, scene, sceneEdge, projector, renderer, mesh, meshEdge, lightCameraVisibility = false,
       globalLight;
   var shadermaterial, facematerial;
-  var WIDTH = $('canvas').width();
-  var HEIGHT = $('canvas').height();
-  
+  var WIDTH = $('#canvas').width();
+  var HEIGHT = $('#canvas').height();
+
   function createScene(geometry, materials) {
     shadermaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
@@ -45,7 +45,7 @@ $(document).ready(function () {
 
   function init() {
     camera = new THREE.PerspectiveCamera(55, WIDTH / HEIGHT, 1, 1000);
-    camera.position.set(0, 0, 0);
+    camera.position.set(0, 0, 10);
     scene = new THREE.Scene();
     sceneEdge = new THREE.Scene();
     globalLight = new THREE.DirectionalLight('white');
@@ -53,13 +53,15 @@ $(document).ready(function () {
     var sphere = new THREE.Mesh(
       new THREE.SphereGeometry(2, 16, 16),
       new THREE.MeshPhongMaterial({
-        side: THREE.FrontSide, shading: THREE.FlatShading, color: "#f00"
+        side: THREE.FrontSide, shading: THREE.FlatShading, color: 'red'
       })
     );
-    var geometry = new THREE.CubeGeometry( 30, 30, 30 );
-    var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
-    var cube = new THREE.Mesh( geometry, material );
-    scene.add(cube);
+    var cube = new THREE.Mesh(
+      new THREE.CubeGeometry(30, 30, 30),
+      new THREE.MeshPhongMaterial({
+        color: 'red'
+      })
+    );
 //    var loader = new THREE.JSONLoader(true);
 //    loader.load('mesh/sheep.js', createScene);
     renderer = new THREE.WebGLRenderer({
@@ -69,10 +71,12 @@ $(document).ready(function () {
     scene.add(globalLight);
     scene.add(camera);
     scene.add(sphere);
+    scene.add(cube);
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
-    primary = document.getElementById('primary');
-    primary.appendChild(renderer.domElement);
+    var canvas = document.getElementById('canvas');
+    console.log(renderer.domElement)
+    canvas.appendChild(renderer.domElement);
     renderer.render(scene, camera);
   }
 
