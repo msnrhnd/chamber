@@ -1,6 +1,5 @@
 $(document).ready(function () {
-  var container, camera, controls, scene, sceneEdge, projector, renderer, mesh, meshEdge, lightCameraVisibility = false,
-      globalLight;
+  var container, camera, controls, scene, sceneEdge, renderer, mesh, meshEdge, globalLight, ambientLight;
   var shadermaterial, facematerial;
   var WIDTH = $('#canvas').width();
   var HEIGHT = $('#canvas').height();
@@ -24,7 +23,7 @@ $(document).ready(function () {
         },
         texture: {
           type: 't',
-          value: THREE.TextureLoader('texture/toon.png')
+          value: new THREE.TextureLoader('texture/toon.png')
         }
       }
     });
@@ -35,10 +34,10 @@ $(document).ready(function () {
       }
       facematerial = new THREE.MeshFaceMaterial(materials);
     }
-    mesh = new THREE.SkinnedMesh(geometry, shadermaterial);
+    mesh = new THREE.SkinnedMesh(geometry, facematerial);
     mesh.scale.set(1, 1, 1);
     mesh.position.set(0, 0, 0);
-    meshEdge = mesh.clone();
+    meshEdge = new THREE.SkinnedMesh(geometry, shadermaterial);
     scene.add(mesh);
     sceneEdge.add(meshEdge);
   }
@@ -49,6 +48,9 @@ $(document).ready(function () {
     controls = new THREE.OrbitControls(camera); 
     scene = new THREE.Scene();
     sceneEdge = new THREE.Scene();
+    ambientLight = new THREE.AmbientLight('white');
+    scene.add(ambientLight);
+    sceneEdge.add(ambientLight);
     globalLight = new THREE.DirectionalLight('white');
     globalLight.position.set(1, 0, 0).normalize();
     var loader = new THREE.JSONLoader(true);
@@ -56,46 +58,28 @@ $(document).ready(function () {
     renderer = new THREE.WebGLRenderer({
       antialias: true
     });
-    //    renderer.sortObjects = false;
+    renderer.sortObjects = false;
     scene.add(globalLight);
-    scene.add(camera);
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     var canvas = document.getElementById('canvas');
     canvas.appendChild(renderer.domElement);
   }
 
-  function render() {    
+  function render() {
     if (mesh) {
-      meshEdge.material.side = THREE.FrontSide;
-      mesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
-      mesh.material.uniforms.edge.value = false;
-    } 
+      mesh.material.side = THREE.FrontSide;
+//      mesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
+//      mesh.material.uniforms.edge.value = false;
+    }
     renderer.render(scene, camera);
     if (mesh) {
-      meshEdge.material.side = THREE.BackSide;
+      mesh.material.side = THREE.BackSide;
       meshEdge.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 1);
       meshEdge.material.uniforms.edge.value = true;
     }
-    renderer.render(sceneEdge, camera);
+//    renderer.render(sceneEdge, camera);
     requestAnimationFrame(render);
-  }
-   
-  function _render() {
-    if (mesh) {
-      if (meshFlg) {
-        meshEdge.material.side = THREE.FrontSide;
-        mesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
-        mesh.material.uniforms.edge.value = false;
-      }
-      renderer.render(scene, camera);
-      if (meshFlg) {
-        meshEdge.material.side = THREE.BackSide;
-        meshEdge.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 1);
-        meshEdge.material.uniforms.edge.value = true;
-        renderer.render(sceneEdge, camera);
-      }
-    }
   }
   init();
   render();
