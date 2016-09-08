@@ -38,6 +38,7 @@
       float diffuse = clamp(dot(vNormal, lightDirection), 0.0, 1.0);
       vec4 smpColor = texture2D(texture, vec2(diffuse, 0.0));
       gl_FragColor = smpColor;
+      gl_FragColor = vec4(1, 1, 0, 1);
     }
   }
 </script>
