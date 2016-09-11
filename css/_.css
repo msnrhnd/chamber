@@ -5820,8 +5820,9 @@ html {
   padding: 2%;
   margin: 0 auto; }
   #container #canvas {
-    width: 685.33333px;
-    height: 685.33333px; }
+    position: fixed;
+    top: 0;
+    left: 0; }
 
 h1 {
   font-size: 2em;

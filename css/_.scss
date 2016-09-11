@@ -31,8 +31,9 @@ html {
   #control {
   }
   #canvas {
-    width: $canvas-width + px;
-    height: $canvas-width + px;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
 }
 

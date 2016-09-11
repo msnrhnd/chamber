@@ -13,33 +13,16 @@
 <script type="text/javascript" src="js/jquery.spin.js"></script>
 <script type="text/javascript" src="js/_.js"></script>
 <script type="x-shader/x-vertex" id="vs">
-  uniform bool edge;
-  varying vec3 vNormal;
   void main(void) {
     vec3 pos = position;
-    if (edge) {
-      pos += normal * 0.001;
-    }
-    vNormal = normal;
+    pos += normal * 0.001;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 </script>
 <script type="x-shader/x-fragment" id="fs">
-  precision mediump float;
-  uniform vec3 lightDirection;
-  uniform sampler2D texture;
   uniform vec4 edgeColor;
-  varying vec3 vNormal;
   void main(void) {
-    if (edgeColor.a > 0.0) {
-      gl_FragColor = edgeColor;
-    }
-    else {
-      float diffuse = clamp(dot(vNormal, lightDirection), 0.0, 1.0);
-      vec4 smpColor = texture2D(texture, vec2(diffuse, 0.0));
-      gl_FragColor = smpColor;
-      gl_FragColor = vec4(1, 1, 0, 1);
-    }
+    gl_FragColor = edgeColor;
   }
 </script>
 <title>Chamber</title>

@@ -1,68 +1,53 @@
 $(document).ready(function () {
-  var container, camera, controls, scene, sceneEdge, renderer, mesh, meshEdge, globalLight, ambientLight;
-  var shadermaterial, facematerial;
-  var WIDTH = $('#canvas').width();
-  var HEIGHT = $('#canvas').height();
+  var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
+  var edgeMaterial, faceMaterial;
+  var WIDTH = $(window).width();
+  var HEIGHT = $(window).height();
+  $('#canvas').css({width: WIDTH, height: HEIGHT});
 
   function createScene(geometry, materials) {
-    shadermaterial = new THREE.ShaderMaterial({
+    geometry.computeBoundingBox();
+    var box = geometry.boundingBox;
+    var h = box.max.z - box.min.z;
+    var angle = 55;
+    var xmax = h / 2 / Math.tan(angle/2);
+    camera = new THREE.PerspectiveCamera(angle, WIDTH / HEIGHT, 0.1, xmax);
+    camera.position.set(-xmax, 0, 0);
+    controls = new THREE.OrbitControls(camera);
+    edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
       uniforms: {
         edgeColor: {
           type: 'v4',
-          value: new THREE.Vector4(0, 0, 0, 0)
-        },
-        edge: {
-          type: 'i',
-          value: true
-        },
-        lightDirection: {
-          type: 'v3',
-          value: globalLight.position
-        },
-        texture: {
-          type: 't',
-          value: new THREE.TextureLoader('texture/toon.png')
+          value: new THREE.Vector4(0, 0, 0, 1)
         }
       }
     });
-    shadermaterial.morphTargets = true;
-    if (materials) {
-      for (var i = 0, l = materials.length; i < l; i++) {
-        materials[i].morphTargets = true;
-      }
-      facematerial = new THREE.MeshFaceMaterial(materials);
-    }
-    mesh = new THREE.SkinnedMesh(geometry, shadermaterial);
-    mesh.scale.set(1, 1, 1);
+    edgeMaterial.morphTargets = true;
+    faceMaterial = new THREE.MultiMaterial(materials);
+    mesh = new THREE.Mesh(geometry, edgeMaterial);
     mesh.position.set(0, 0, 0);
-    meshEdge = mesh.clone();
+    mesh.scale.set(1, 1, 1);
     scene.add(mesh);
-    sceneEdge.add(meshEdge);
+    faceMesh = mesh.clone();
+    faceMesh.material = faceMaterial;
+    faceScene.add(faceMesh);
   }
 
   function init() {
-    camera = new THREE.PerspectiveCamera(55, WIDTH / HEIGHT, 0.1, 1000);
-    camera.position.set(0, 0, 10);
-    controls = new THREE.OrbitControls(camera); 
-    scene = new THREE.Scene();
-    sceneEdge = new THREE.Scene();
     ambientLight = new THREE.AmbientLight('white');
+    scene = new THREE.Scene();
+    faceScene = new THREE.Scene();
+    faceScene.add(ambientLight);
     scene.add(ambientLight);
-    globalLight = new THREE.DirectionalLight('white');
-    scene.add(globalLight);
-    sceneEdge.add(ambientLight);
-    globalLight.position.set(1, 0, 0).normalize();
     var loader = new THREE.JSONLoader(true);
     loader.load('mesh/sheep.js', createScene);
     renderer = new THREE.WebGLRenderer({
       antialias: true
     });
     renderer.setSize(WIDTH, HEIGHT);
-    renderer.setClearColor('white', 1);
     renderer.setClearColor('lightgray', 1);
-    renderer.sortObjects = false;
     renderer.autoClear = false;
     var canvas = document.getElementById('canvas');
     canvas.appendChild(renderer.domElement);
@@ -70,25 +55,17 @@ $(document).ready(function () {
 
   function render() {
     renderer.clear();
-    if (meshEdge) {
-      meshEdge.material.side = THREE.BackSide;
-      meshEdge.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 1);
-      meshEdge.material.uniforms.edge.value = true;
-    }
-    renderer.render(sceneEdge, camera);
     if (mesh) {
-      meshEdge.material.side = THREE.FrontSide;
-      mesh.material.uniforms.edgeColor.value = new THREE.Vector4(0, 0, 0, 0);
-      mesh.material.uniforms.edge.value = false;
+      mesh.material.side = THREE.BackSide;
+      renderer.render(scene, camera);
     }
-    renderer.render(scene, camera);
+    if (faceMesh) {
+      faceMesh.material.side = THREE.FrontSide;
+      renderer.render(faceScene, camera);
+    }
     requestAnimationFrame(render);
   }
   init();
   render();
 });
-
-
-
-
 
