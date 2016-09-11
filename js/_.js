@@ -1,23 +1,32 @@
 $(document).ready(function () {
   var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
   var edgeMaterial, faceMaterial;
+  var ANGLE = 55;
   var WIDTH = $(window).width();
   var HEIGHT = $(window).height();
-  $('#canvas').css({width: WIDTH, height: HEIGHT});
+  $('#canvas').css({
+    width: WIDTH,
+    height: HEIGHT
+  });
 
   function createScene(geometry, materials) {
     geometry.computeBoundingBox();
     var box = geometry.boundingBox;
     var h = box.max.z - box.min.z;
-    var angle = 55;
-    var xmax = h / 2 / Math.tan(angle/2);
-    camera = new THREE.PerspectiveCamera(angle, WIDTH / HEIGHT, 0.1, xmax);
+    var w = box.max.x - box.min.x;
+    var d = box.max.y - box.min.y;
+    var xmax = h / 2 / Math.tan(ANGLE / 2);
+    camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, 0.1, xmax);
     camera.position.set(-xmax, 0, 0);
     controls = new THREE.OrbitControls(camera);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
       uniforms: {
+        tickness: {
+          type: 'f',
+          value: Math.pow(w * h * d, 1 / 3) / 100
+        },
         edgeColor: {
           type: 'v4',
           value: new THREE.Vector4(0, 0, 0, 1)
@@ -68,4 +77,3 @@ $(document).ready(function () {
   init();
   render();
 });
-

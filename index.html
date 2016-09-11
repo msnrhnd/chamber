@@ -13,9 +13,10 @@
 <script type="text/javascript" src="js/jquery.spin.js"></script>
 <script type="text/javascript" src="js/_.js"></script>
 <script type="x-shader/x-vertex" id="vs">
+  uniform float tickness;
   void main(void) {
     vec3 pos = position;
-    pos += normal * 0.001;
+    pos += normal * tickness;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 </script>
