@@ -1,7 +1,6 @@
 @import "bootstrap";
 
 $main-width: 1028;
-$canvas-width: $main-width * 2 / 3;
 
 @mixin fontsize($size: 24, $base: 16) {
   font-size: $size + px;
@@ -33,7 +32,6 @@ html {
   #canvas {
     position: fixed;
     top: 0;
-    left: 0;
   }
 }
 

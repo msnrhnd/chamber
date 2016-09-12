@@ -1,31 +1,30 @@
 $(document).ready(function () {
   var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
-  var edgeMaterial, faceMaterial;
+  var edgeMaterial, faceMaterial, rt;
   var ANGLE = 55;
-  var WIDTH = $(window).width();
   var HEIGHT = $(window).height();
+  var WIDTH = HEIGHT;
   $('#canvas').css({
     width: WIDTH,
-    height: HEIGHT
+    height: HEIGHT,
+    left: ($(window).width() - WIDTH) / 2
   });
-
+  var canvas = document.getElementById('canvas');
+  
   function createScene(geometry, materials) {
-    geometry.computeBoundingBox();
-    var box = geometry.boundingBox;
-    var h = box.max.z - box.min.z;
-    var w = box.max.x - box.min.x;
-    var d = box.max.y - box.min.y;
-    var xmax = h / 2 / Math.tan(ANGLE / 2);
-    camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, 0.1, xmax);
-    camera.position.set(-xmax, 0, 0);
-    controls = new THREE.OrbitControls(camera);
+    geometry.computeBoundingSphere();
+    var r = geometry.boundingSphere.radius;
+    var xmin = r / Math.tan(THREE.Math.degToRad(ANGLE) / 2);
+    camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, r / 10, r * 10);
+    camera.position.set(xmin, 0, 0);
+    controls = new THREE.OrbitControls(camera, canvas);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
       uniforms: {
         tickness: {
           type: 'f',
-          value: Math.pow(w * h * d, 1 / 3) / 100
+          value: r / 100
         },
         edgeColor: {
           type: 'v4',
@@ -55,10 +54,10 @@ $(document).ready(function () {
     renderer = new THREE.WebGLRenderer({
       antialias: true
     });
+    rt = renderer.devicePixelRatio;
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
-    var canvas = document.getElementById('canvas');
     canvas.appendChild(renderer.domElement);
   }
 

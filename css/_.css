@@ -5821,8 +5821,7 @@ html {
   margin: 0 auto; }
   #container #canvas {
     position: fixed;
-    top: 0;
-    left: 0; }
+    top: 0; }
 
 h1 {
   font-size: 2em;
