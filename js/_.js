@@ -2,22 +2,30 @@ $(document).ready(function () {
   var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
   var edgeMaterial, faceMaterial, rt;
   var ANGLE = 55;
-  var HEIGHT = $(window).height();
-  var WIDTH = HEIGHT;
-  $('#canvas').css({
-    width: WIDTH,
-    height: HEIGHT,
-    left: ($(window).width() - WIDTH) / 2
+  var $wrapper = $('#wrapper');
+  var WIDTH, HEIGHT;
+  function drawCanvas() {
+    HEIGHT = $(window).height();
+    WIDTH = HEIGHT;
+    $wrapper.css({
+      width: WIDTH,
+      height: HEIGHT,
+      left: ($(window).width() - WIDTH) / 2
+    });
+  }
+  $(window).resize(function() {
+    drawCanvas();
+    camera.aspect = WIDTH / HEIGHT;
+    camera.updateProjectionMatrix();
+    renderer.setSize( WIDTH, HEIGHT );
   });
-  var canvas = document.getElementById('canvas');
-  
   function createScene(geometry, materials) {
     geometry.computeBoundingSphere();
     var r = geometry.boundingSphere.radius;
     var xmin = r / Math.tan(THREE.Math.degToRad(ANGLE) / 2);
     camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, r / 10, r * 10);
     camera.position.set(xmin, 0, 0);
-    controls = new THREE.OrbitControls(camera, canvas);
+    controls = new THREE.OrbitControls(camera, $wrapper[0]);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
@@ -42,23 +50,26 @@ $(document).ready(function () {
     faceMesh.material = faceMaterial;
     faceScene.add(faceMesh);
   }
-
+  function load(path) {
+    var loader = new THREE.JSONLoader(true);
+    loader.load(path, createScene);
+  }
   function init() {
     ambientLight = new THREE.AmbientLight('white');
     scene = new THREE.Scene();
     faceScene = new THREE.Scene();
     faceScene.add(ambientLight);
     scene.add(ambientLight);
-    var loader = new THREE.JSONLoader(true);
-    loader.load('mesh/sheep.js', createScene);
+    load('mesh/sheep.js');
     renderer = new THREE.WebGLRenderer({
-      antialias: true
+      antialias: true,
+      preserveDrawingBuffer: true
     });
     rt = renderer.devicePixelRatio;
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
-    canvas.appendChild(renderer.domElement);
+    $wrapper[0].appendChild(renderer.domElement);
   }
 
   function render() {
@@ -73,6 +84,20 @@ $(document).ready(function () {
     }
     requestAnimationFrame(render);
   }
+  drawCanvas();
   init();
   render();
+  $('#upload').click(function() {
+    $('#file-input').val('');
+    $('#file-input').trigger('click');
+  });
+  $('#file-input').change(function () {
+    var filename = $('#file-input').val().split('\\')[2];
+    console.log(filename);
+  });
+  $('#download').click(function() {
+    var canvas = document.getElementsByTagName('canvas')[0];
+    var img = canvas.toDataURL('image/png');
+    console.log(img);
+  });
 });
