@@ -54,6 +54,7 @@ $(document).ready(function () {
     faceMesh.material = faceMaterial;
     faceScene.add(faceMesh);
   }
+  
   function load(path) {
     var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
