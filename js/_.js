@@ -28,8 +28,9 @@ $(document).ready(function () {
     var o = geometry.boundingSphere.center;
     var r = geometry.boundingSphere.radius;
     camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 2, r * 2);
-    camera.position.set(0, 0, 0);
+    camera.position.set(.1, 0, 0);
     controls = new THREE.OrbitControls(camera, $wrapper[0]);
+    controls.maxPolarAngle = Math.PI;
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
@@ -47,8 +48,7 @@ $(document).ready(function () {
     edgeMaterial.morphTargets = true;
     faceMaterial = new THREE.MeshFaceMaterial(materials);
     mesh = new THREE.Mesh(geometry, edgeMaterial);
-    mesh.position.set(0, 0, 0);
-    mesh.scale.set(1, 1, 1);
+    mesh.position.set(-o.x, -o.y, -o.z);
     scene.add(mesh);
     faceMesh = mesh.clone();
     faceMesh.material = faceMaterial;
@@ -67,6 +67,7 @@ $(document).ready(function () {
     scene.add(ambientLight);
     faceScene.add(ambientLight);
     load('mesh/sheep.js');
+//    load('mesh/weared_human.js');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true
