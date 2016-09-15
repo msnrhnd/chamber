@@ -66,7 +66,8 @@ $(document).ready(function () {
     faceScene = new THREE.Scene();
     scene.add(ambientLight);
     faceScene.add(ambientLight);
-    load('mesh/sheep.js');
+//    load('mesh/sheep.js');
+    load('mesh/spiral.json');
 //    load('mesh/weared_human.js');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
