@@ -1,5 +1,5 @@
 {
-    "name":"sheepGeometry.4",
+    "name":"ひつじ社員",
     "metadata":{
         "type":"Geometry",
         "version":3,

@@ -54,7 +54,6 @@ $(document).ready(function () {
     faceMesh.material = faceMaterial;
     faceScene.add(faceMesh);
   }
-
   function load(path) {
     var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
@@ -66,9 +65,6 @@ $(document).ready(function () {
     faceScene = new THREE.Scene();
     scene.add(ambientLight);
     faceScene.add(ambientLight);
-//    load('mesh/sheep.js');
-    load('mesh/spiral.json');
-//    load('mesh/weared_human.js');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true
@@ -77,6 +73,9 @@ $(document).ready(function () {
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
+    //    load('mesh/sheep.js');
+    load('mesh/spiral.js');
+    //    load('mesh/weared_human.js');
     $wrapper[0].appendChild(renderer.domElement);
   }
 
@@ -119,5 +118,10 @@ $(document).ready(function () {
     a.download = 'image.png';
     a.href = window.URL.createObjectURL(blob);
     a.click();
+  });
+  $('#refresh').click(function () {
+    $('canvas').remove();
+    init();
+    render();
   });
 });
