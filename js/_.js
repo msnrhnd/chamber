@@ -25,10 +25,10 @@ $(document).ready(function () {
   function createScene(geometry, materials) {
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
+    var o = geometry.boundingSphere.center;
     var r = geometry.boundingSphere.radius;
-    var xmin = r / Math.tan(THREE.Math.degToRad(ANGLE) / 2);
-    camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, r / 10, r * 10);
-    camera.position.set(xmin, r / 2, 0);
+    camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 2, r * 2);
+    camera.position.set(0, 0, 0);
     controls = new THREE.OrbitControls(camera, $wrapper[0]);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
@@ -64,8 +64,8 @@ $(document).ready(function () {
     ambientLight = new THREE.AmbientLight('white');
     scene = new THREE.Scene();
     faceScene = new THREE.Scene();
-    faceScene.add(ambientLight);
     scene.add(ambientLight);
+    faceScene.add(ambientLight);
     load('mesh/sheep.js');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -99,6 +99,7 @@ $(document).ready(function () {
   });
   $('#file-input').change(function () {
     var filename = $('#file-input').val().split('\\')[2];
+    console.log(filename)
   });
   $('#download').click(function () {
     var type = 'image/png';
