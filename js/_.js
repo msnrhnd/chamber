@@ -66,7 +66,7 @@ $(document).ready(function () {
     faceScene = new THREE.Scene();
     faceScene.add(ambientLight);
     scene.add(ambientLight);
-    load('mesh/sheep.json');
+    load('mesh/sheep.js');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true
