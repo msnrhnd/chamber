@@ -1,9 +1,10 @@
 $(document).ready(function () {
   var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
-  var edgeMaterial, faceMaterial, rt;
+  var edgeMaterial, faceMaterial;
   var ANGLE = 55;
   var $wrapper = $('#wrapper');
   var WIDTH, HEIGHT;
+
   function drawCanvas() {
     HEIGHT = $(window).height();
     WIDTH = HEIGHT;
@@ -13,18 +14,21 @@ $(document).ready(function () {
       left: ($(window).width() - WIDTH) / 2
     });
   }
-  $(window).resize(function() {
+  $(window).resize(function () {
     drawCanvas();
     camera.aspect = WIDTH / HEIGHT;
     camera.updateProjectionMatrix();
-    renderer.setSize( WIDTH, HEIGHT );
+    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setPixelRatio(window.devicePixelRatio);
   });
+
   function createScene(geometry, materials) {
+    geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
     var r = geometry.boundingSphere.radius;
     var xmin = r / Math.tan(THREE.Math.degToRad(ANGLE) / 2);
     camera = new THREE.PerspectiveCamera(ANGLE, WIDTH / HEIGHT, r / 10, r * 10);
-    camera.position.set(xmin, 0, 0);
+    camera.position.set(xmin, r / 2, 0);
     controls = new THREE.OrbitControls(camera, $wrapper[0]);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
@@ -41,7 +45,7 @@ $(document).ready(function () {
       }
     });
     edgeMaterial.morphTargets = true;
-    faceMaterial = new THREE.MultiMaterial(materials);
+    faceMaterial = new THREE.MeshFaceMaterial(materials);
     mesh = new THREE.Mesh(geometry, edgeMaterial);
     mesh.position.set(0, 0, 0);
     mesh.scale.set(1, 1, 1);
@@ -50,22 +54,24 @@ $(document).ready(function () {
     faceMesh.material = faceMaterial;
     faceScene.add(faceMesh);
   }
+
   function load(path) {
-    var loader = new THREE.JSONLoader(true);
+    var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
   }
+
   function init() {
     ambientLight = new THREE.AmbientLight('white');
     scene = new THREE.Scene();
     faceScene = new THREE.Scene();
     faceScene.add(ambientLight);
     scene.add(ambientLight);
-    load('mesh/sheep.js');
+    load('mesh/sheep.json');
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true
     });
-    rt = renderer.devicePixelRatio;
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
@@ -87,17 +93,28 @@ $(document).ready(function () {
   drawCanvas();
   init();
   render();
-  $('#upload').click(function() {
+  $('#upload').click(function () {
     $('#file-input').val('');
     $('#file-input').trigger('click');
   });
   $('#file-input').change(function () {
     var filename = $('#file-input').val().split('\\')[2];
-    console.log(filename);
   });
-  $('#download').click(function() {
+  $('#download').click(function () {
+    var type = 'image/png';
     var canvas = document.getElementsByTagName('canvas')[0];
-    var img = canvas.toDataURL('image/png');
-    console.log(img);
+    var imgData = canvas.toDataURL(type);
+    var bin = atob(imgData.split(',')[1]);
+    var buffer = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) {
+      buffer[i] = bin.charCodeAt(i);
+    }
+    var blob = new Blob([buffer.buffer], {
+      type: type
+    });
+    var a = document.createElement('a');
+    a.download = 'image.png';
+    a.href = window.URL.createObjectURL(blob);
+    a.click();
   });
 });
