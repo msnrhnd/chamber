@@ -5829,8 +5829,15 @@ html {
       position: absolute; }
       #container #wrapper button#download {
         right: 0; }
-  #container input {
-    display: none; }
+
+#finder ul, #finder li {
+  list-style-type: none;
+  padding: 0; }
+#finder i {
+  margin-right: .4em; }
+#finder a {
+  color: black;
+  text-decoration: none; }
 
 h1 {
   font-size: 2em;

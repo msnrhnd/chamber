@@ -5,7 +5,8 @@ $(document).ready(function () {
   var SIDE;
   var ANGLE = 55;
   var $wrapper = $('#wrapper');
-
+  var $finder = $('#finder');
+  
   function drawCanvas() {
     SIDE = Math.min($(window).height(), $(window).width());
     $wrapper.css({
@@ -55,7 +56,7 @@ $(document).ready(function () {
     faceMesh.material = faceMaterial;
     faceScene.add(faceMesh);
   }
-  
+
   function load(path) {
     var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
@@ -75,9 +76,6 @@ $(document).ready(function () {
     renderer.setSize(SIDE, SIDE);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
-    //    load('mesh/sheep.js');
-    load('mesh/spiral.js');
-    //    load('mesh/weared_human.js');
     $wrapper[0].appendChild(renderer.domElement);
   }
 
@@ -92,16 +90,26 @@ $(document).ready(function () {
       data: fd,
       dataType: 'json',
       timeout: 12000,
-      success: function (paths) {
-        $(paths).each(function(i, path) {
-          console.log(path.split('../' + MESH_DIR + '/')[1]);
-        });
+      success: function (tree) {
+        tree.state = {'opened': true};
+        $('#finder').on('click', '.jstree-anchor', function (e) {
+          $(this).jstree(true).toggle_node(e.target);
+        }).jstree({'core': {'data': tree}});
       },
       error: function (e) {
         console.log(e);
       }
     });
   })();
+
+  $(document).on('click', '.load', function(e) {
+    scene.children.forEach(function(object){
+      if(object.type === 'Mesh')
+        scene.remove(object);
+    });
+    var path = $(e.target).attr('path');
+    load(path);
+  });
   
   function render() {
     renderer.clear();
@@ -118,14 +126,6 @@ $(document).ready(function () {
   drawCanvas();
   init();
   render();
-  $('#upload').click(function () {
-    $('#file-input').val('');
-    $('#file-input').trigger('click');
-  });
-  $('#file-input').change(function () {
-    var filename = $('#file-input').val().split('\\')[2];
-    console.log(filename)
-  });
   $('#download').click(function () {
     var type = 'image/png';
     var canvas = document.getElementsByTagName('canvas')[0];
@@ -142,10 +142,5 @@ $(document).ready(function () {
     a.download = 'image.png';
     a.href = window.URL.createObjectURL(blob);
     a.click();
-  });
-  $('#refresh').click(function () {
-    $('canvas').remove();
-    init();
-    render();
   });
 });
