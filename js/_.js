@@ -1,24 +1,25 @@
 $(document).ready(function () {
   var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
   var edgeMaterial, faceMaterial;
+  var MESH_DIR = 'mesh';
+  var SIDE;
   var ANGLE = 55;
   var $wrapper = $('#wrapper');
-  var WIDTH, HEIGHT;
 
   function drawCanvas() {
-    HEIGHT = $(window).height();
-    WIDTH = HEIGHT;
+    SIDE = Math.min($(window).height(), $(window).width());
     $wrapper.css({
-      width: WIDTH,
-      height: HEIGHT,
-      left: ($(window).width() - WIDTH) / 2
+      width: SIDE,
+      height: SIDE,
+      left: ($(window).width() - SIDE) / 2,
+      top: ($(window).height() - SIDE) / 2
     });
   }
   $(window).resize(function () {
     drawCanvas();
-    camera.aspect = WIDTH / HEIGHT;
+    camera.aspect = 1;
     camera.updateProjectionMatrix();
-    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setSize(SIDE, SIDE);
     renderer.setPixelRatio(window.devicePixelRatio);
   });
 
@@ -71,7 +72,7 @@ $(document).ready(function () {
       preserveDrawingBuffer: true
     });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setSize(SIDE, SIDE);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
     //    load('mesh/sheep.js');
@@ -80,6 +81,28 @@ $(document).ready(function () {
     $wrapper[0].appendChild(renderer.domElement);
   }
 
+  (function () {
+    var fd = new FormData();
+    fd.append('action', 'init');
+    fd.append('mesh_dir', MESH_DIR);
+    $.ajax('htbin/_.cgi', {
+      type: 'post',
+      processData: false,
+      contentType: false,
+      data: fd,
+      dataType: 'json',
+      timeout: 12000,
+      success: function (paths) {
+        $(paths).each(function(i, path) {
+          console.log(path.split('../' + MESH_DIR + '/')[1]);
+        });
+      },
+      error: function (e) {
+        console.log(e);
+      }
+    });
+  })();
+  
   function render() {
     renderer.clear();
     if (mesh) {

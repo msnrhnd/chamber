@@ -5821,6 +5821,14 @@ html {
   #container #wrapper {
     position: fixed;
     top: 0; }
+    #container #wrapper button {
+      background: none;
+      border: none;
+      box-shadow: none;
+      color: white;
+      position: absolute; }
+      #container #wrapper button#download {
+        right: 0; }
   #container input {
     display: none; }
 
