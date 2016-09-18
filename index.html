@@ -12,10 +12,10 @@
 <script type="text/javascript" src="js/jstree.min.js"></script>
 <script type="text/javascript" src="js/_.js"></script>
 <script type="x-shader/x-vertex" id="vs">
-  uniform float tickness;
+  uniform float thickness;
   void main(void) {
     vec3 pos = position;
-    pos += normal * tickness;
+    pos += normal * thickness;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 </script>
@@ -27,12 +27,10 @@
 </script>
 <title>Chamber</title>
 <div id="container">
-<!--<h1>Chamber</h1>-->
 <div id="wrapper">
-<button id="load" class="btn btn-default btn-lg"><i class="fa fa-folder"></i></button><button id="download" class="btn btn-default btn-lg"><i class="fa fa-camera"></i></button>
+<div id="finder"></div>
+<button id="open-folder" class="btn btn-default btn-lg"><i class="fa fa-folder"></i></button><button id="download" class="btn btn-default btn-lg"><i class="fa fa-camera"></i></button>
 </div><!-- wrapper -->
-<div id="finder">
-</div>
 </div><!-- #container -->
 <footer>
   <div>&copy; 2016- Masanori HONDA</div>

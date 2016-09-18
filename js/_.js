@@ -1,45 +1,47 @@
 $(document).ready(function () {
-  var container, camera, controls, scene, faceScene, mesh, faceMesh, globalLight, ambientLight, renderer;
+  var camera, controls, scene, mesh, faceMesh, renderer, thickness;
   var edgeMaterial, faceMaterial;
+  var EPS = 0.000001;
   var MESH_DIR = 'mesh';
-  var SIDE;
-  var ANGLE = 55;
+  var side;
   var $wrapper = $('#wrapper');
   var $finder = $('#finder');
-  
-  function drawCanvas() {
-    SIDE = Math.min($(window).height(), $(window).width());
+
+  function setCSS() {
+    var w = $(window).width();
+    var h = $(window).height();
+    side = Math.min(h, w);
     $wrapper.css({
-      width: SIDE,
-      height: SIDE,
-      left: ($(window).width() - SIDE) / 2,
-      top: ($(window).height() - SIDE) / 2
+      width: side,
+      height: side,
+      left: (w - side) / 2,
+      top: (h - side) / 2
     });
   }
-  $(window).resize(function () {
-    drawCanvas();
-    camera.aspect = 1;
-    camera.updateProjectionMatrix();
-    renderer.setSize(SIDE, SIDE);
-    renderer.setPixelRatio(window.devicePixelRatio);
-  });
+
+  function load(path) {
+    if (scene) {
+      scene.remove(mesh);
+      scene.remove(faceMesh);
+    }
+    var loader = new THREE.JSONLoader();
+    loader.load(path, createScene);
+  }
 
   function createScene(geometry, materials) {
+    scene = new THREE.Scene();
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
     var o = geometry.boundingSphere.center;
     var r = geometry.boundingSphere.radius;
-    camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 2, r * 2);
-    camera.position.set(.1, 0, 0);
-    controls = new THREE.OrbitControls(camera, $wrapper[0]);
-    controls.maxPolarAngle = Math.PI;
+    thickness = r / 100
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
       uniforms: {
-        tickness: {
+        thickness: {
           type: 'f',
-          value: r / 100
+          value: thickness
         },
         edgeColor: {
           type: 'v4',
@@ -54,78 +56,49 @@ $(document).ready(function () {
     scene.add(mesh);
     faceMesh = mesh.clone();
     faceMesh.material = faceMaterial;
-    faceScene.add(faceMesh);
+    scene.add(faceMesh);
+    setCamera(r);
   }
 
-  function load(path) {
-    var loader = new THREE.JSONLoader();
-    loader.load(path, createScene);
+  function setCamera(r) {
+    camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 2, r * 2);
+    camera.position.set(EPS, 0, 0);
+    controls = new THREE.OrbitControls(camera, $wrapper[0]);
   }
 
-  function init() {
-    ambientLight = new THREE.AmbientLight('white');
-    scene = new THREE.Scene();
-    faceScene = new THREE.Scene();
-    scene.add(ambientLight);
-    faceScene.add(ambientLight);
+  function setRenderer() {
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true
     });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(SIDE, SIDE);
+    renderer.setSize(side, side);
     renderer.setClearColor('lightgray', 1);
     renderer.autoClear = false;
     $wrapper[0].appendChild(renderer.domElement);
   }
-
-  (function () {
-    var fd = new FormData();
-    fd.append('action', 'init');
-    fd.append('mesh_dir', MESH_DIR);
-    $.ajax('htbin/_.cgi', {
-      type: 'post',
-      processData: false,
-      contentType: false,
-      data: fd,
-      dataType: 'json',
-      timeout: 12000,
-      success: function (tree) {
-        tree.state = {'opened': true};
-        $('#finder').on('click', '.jstree-anchor', function (e) {
-          $(this).jstree(true).toggle_node(e.target);
-        }).jstree({'core': {'data': tree}});
-      },
-      error: function (e) {
-        console.log(e);
-      }
-    });
-  })();
-
-  $(document).on('click', '.load', function(e) {
-    scene.children.forEach(function(object){
-      if(object.type === 'Mesh')
-        scene.remove(object);
-    });
-    var path = $(e.target).attr('path');
-    load(path);
-  });
   
   function render() {
     renderer.clear();
     if (mesh) {
       mesh.material.side = THREE.BackSide;
+      mesh.material.uniforms.thickness.value = thickness / Math.pow(camera.zoom, 1/2);
       renderer.render(scene, camera);
     }
     if (faceMesh) {
       faceMesh.material.side = THREE.FrontSide;
-      renderer.render(faceScene, camera);
+      renderer.render(scene, camera);
     }
     requestAnimationFrame(render);
   }
-  drawCanvas();
-  init();
-  render();
+
+  $(document).on('click', '.load', function(e) {
+    $finder.fadeOut();
+    $('#open-folder').fadeIn();
+    var path = $(e.target).attr('path');
+    load(path);
+  });
+  
   $('#download').click(function () {
     var type = 'image/png';
     var canvas = document.getElementsByTagName('canvas')[0];
@@ -143,4 +116,47 @@ $(document).ready(function () {
     a.href = window.URL.createObjectURL(blob);
     a.click();
   });
+
+  $('#open-folder').click(function(e) {
+    $('#open-folder').hide();
+    $finder.fadeIn();
+  });
+
+  (function () {
+    var fd = new FormData();
+    fd.append('action', 'init');
+    fd.append('mesh_dir', MESH_DIR);
+    $.ajax('htbin/_.cgi', {
+      type: 'post',
+      processData: false,
+      contentType: false,
+      data: fd,
+      dataType: 'json',
+      timeout: 12000,
+      success: function (tree) {
+        tree.state = {'opened': true};
+        $finder.on('click', '.jstree-anchor', function (e) {
+          $(this).jstree(true).toggle_node(e.target);
+        }).jstree({'core': {'data': tree}});
+      },
+      error: function (e) {
+        console.log(e);
+      }
+    });
+  })();
+
+  $(window).resize(function () {
+    setCSS();
+    renderer.setSize(side, side);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    if (camera) {
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+    }
+  });
+  $finder.hide();
+  setCSS();
+  setRenderer();
+  load(MESH_DIR + '/基礎生物/DNA.js');
+  render();
 });
