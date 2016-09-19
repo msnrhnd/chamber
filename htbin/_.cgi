@@ -15,7 +15,7 @@ def getTree(path):
         d = {'text': os.path.splitext(os.path.basename(path))[0]}
         if os.path.isdir(path):
             children = [getTree(os.path.join(path, x)) for x in os.listdir(path)]
-            d['icon'] = 'fa fa-folder-o'
+            d['icon'] = 'fa fa-folder'
             d['children'] = [x for x in children if x is not None]
         else:
             d['icon'] = 'fa fa-file-o'

@@ -1,9 +1,10 @@
 $(document).ready(function () {
-  var camera, controls, scene, mesh, faceMesh, renderer, thickness;
-  var edgeMaterial, faceMaterial;
+  var camera, controls, scene, mesh, edgeMesh, renderer, dLight, thickness;
+  var edgeMaterial, material;
   var EPS = 0.000001;
   var MESH_DIR = 'mesh';
   var side;
+  var shading = 'basic';
   var $wrapper = $('#wrapper');
   var $finder = $('#finder');
 
@@ -22,19 +23,28 @@ $(document).ready(function () {
   function load(path) {
     if (scene) {
       scene.remove(mesh);
-      scene.remove(faceMesh);
+      scene.remove(edgeMesh);
+      scene.remove(dLight);
     }
     var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
   }
 
   function createScene(geometry, materials) {
+    console.log(materials);
     scene = new THREE.Scene();
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
     var o = geometry.boundingSphere.center;
     var r = geometry.boundingSphere.radius;
-    thickness = r / 100
+    thickness = r / 100;
+    dLight = new THREE.DirectionalLight('white', 1);
+    dLight.position.set(r, 0, 0);
+    scene.add(dLight);
+    material = new THREE.MeshFaceMaterial(materials);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(-o.x, -o.y, -o.z);
+    scene.add(mesh);
     edgeMaterial = new THREE.ShaderMaterial({
       fragmentShader: document.getElementById('fs').innerHTML,
       vertexShader: document.getElementById('vs').innerHTML,
@@ -49,19 +59,14 @@ $(document).ready(function () {
         }
       }
     });
-    edgeMaterial.morphTargets = true;
-    faceMaterial = new THREE.MeshFaceMaterial(materials);
-    mesh = new THREE.Mesh(geometry, edgeMaterial);
-    mesh.position.set(-o.x, -o.y, -o.z);
-    scene.add(mesh);
-    faceMesh = mesh.clone();
-    faceMesh.material = faceMaterial;
-    scene.add(faceMesh);
+    edgeMesh = mesh.clone();
+    edgeMesh.material = edgeMaterial;
+    scene.add(edgeMesh);
     setCamera(r);
   }
 
   function setCamera(r) {
-    camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 2, r * 2);
+    camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 12, r * 12);
     camera.position.set(EPS, 0, 0);
     controls = new THREE.OrbitControls(camera, $wrapper[0]);
   }
@@ -77,16 +82,16 @@ $(document).ready(function () {
     renderer.autoClear = false;
     $wrapper[0].appendChild(renderer.domElement);
   }
-  
+
   function render() {
     renderer.clear();
     if (mesh) {
-      mesh.material.side = THREE.BackSide;
-      mesh.material.uniforms.thickness.value = thickness / Math.pow(camera.zoom, 1/2);
+      mesh.material.side = THREE.FrontSide;
       renderer.render(scene, camera);
     }
-    if (faceMesh) {
-      faceMesh.material.side = THREE.FrontSide;
+    if (edgeMesh) {
+      edgeMesh.material.side = THREE.BackSide;
+      edgeMesh.material.uniforms.thickness.value = thickness / Math.pow(camera.zoom, 1/2);
       renderer.render(scene, camera);
     }
     requestAnimationFrame(render);
@@ -98,7 +103,7 @@ $(document).ready(function () {
     var path = $(e.target).attr('path');
     load(path);
   });
-  
+
   $('#download').click(function () {
     var type = 'image/png';
     var canvas = document.getElementsByTagName('canvas')[0];
@@ -117,6 +122,16 @@ $(document).ready(function () {
     a.click();
   });
 
+  $('#shading').click(function(e) {
+    if (shading == 'basic') {
+      shading = 'phong';
+    }
+    else {
+      shading = 'basic';
+    }    console.log(mesh.material.materials[0]);
+    console.log(mesh.material.materials[1]);
+  });
+  
   $('#open-folder').click(function(e) {
     $('#open-folder').hide();
     $finder.fadeIn();

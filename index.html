@@ -12,6 +12,7 @@
 <script type="text/javascript" src="js/jstree.min.js"></script>
 <script type="text/javascript" src="js/_.js"></script>
 <script type="x-shader/x-vertex" id="vs">
+  uniform bool edge;
   uniform float thickness;
   void main(void) {
     vec3 pos = position;
@@ -29,7 +30,7 @@
 <div id="container">
 <div id="wrapper">
 <div id="finder"></div>
-<button id="open-folder" class="btn btn-default btn-lg"><i class="fa fa-folder"></i></button><button id="download" class="btn btn-default btn-lg"><i class="fa fa-camera"></i></button>
+<button id="open-folder" class="btn btn-default btn-lg"><i class="fa fa-folder"></i></button><button id="download" class="btn btn-default btn-lg"><i class="fa fa-camera"></i></button><button id="shading" class="btn btn-default btn-lg"><i class="fa fa-picture-o"></i></button>
 </div><!-- wrapper -->
 </div><!-- #container -->
 <footer>

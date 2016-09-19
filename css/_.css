@@ -5849,6 +5849,8 @@ html {
       color: white; }
       #container #wrapper button#download {
         right: 0; }
+      #container #wrapper button#shading {
+        bottom: 0; }
 
 h1 {
   font-size: 2em;
