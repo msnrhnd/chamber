@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  var camera, controls, scene, mesh, edgeMesh, renderer, dLight, thickness;
+  var camera, controls, scene, mesh, edgeMesh, renderer, aLight, dLight, thickness;
   var edgeMaterial, material;
   var EPS = 0.000001;
   var MESH_DIR = 'mesh';
@@ -25,24 +25,28 @@ $(document).ready(function () {
       scene.remove(mesh);
       scene.remove(edgeMesh);
       scene.remove(dLight);
+      scene.remove(aLight);
     }
-    var loader = new THREE.JSONLoader();
+    var manager = new THREE.LoadingManager();
+   var loader = new THREE.JSONLoader();
     loader.load(path, createScene);
   }
 
   function createScene(geometry, materials) {
-    console.log(materials);
     scene = new THREE.Scene();
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
     var o = geometry.boundingSphere.center;
     var r = geometry.boundingSphere.radius;
     thickness = r / 100;
-    dLight = new THREE.DirectionalLight('white', 1);
-    dLight.position.set(r, 0, 0);
+    dLight = new THREE.DirectionalLight('white', .8);
+    dLight.position.set(r, r, r);
     scene.add(dLight);
+    aLight = new THREE.AmbientLight('dimgray');
+    scene.add(aLight);
     material = new THREE.MeshFaceMaterial(materials);
     mesh = new THREE.Mesh(geometry, material);
+    setBasic(material);
     mesh.position.set(-o.x, -o.y, -o.z);
     scene.add(mesh);
     edgeMaterial = new THREE.ShaderMaterial({
@@ -91,13 +95,13 @@ $(document).ready(function () {
     }
     if (edgeMesh) {
       edgeMesh.material.side = THREE.BackSide;
-      edgeMesh.material.uniforms.thickness.value = thickness / Math.pow(camera.zoom, 1/2);
+      edgeMesh.material.uniforms.thickness.value = shading == 'basic' ? thickness / Math.pow(camera.zoom, 1 / 2) : '0';
       renderer.render(scene, camera);
     }
     requestAnimationFrame(render);
   }
 
-  $(document).on('click', '.load', function(e) {
+  $(document).on('click', '.load', function (e) {
     $finder.fadeOut();
     $('#open-folder').fadeIn();
     var path = $(e.target).attr('path');
@@ -122,17 +126,43 @@ $(document).ready(function () {
     a.click();
   });
 
-  $('#shading').click(function(e) {
+  function setBasic(material) {
+    shading = 'basic';
+    var materials_length = material.materials.length;
+    for (var i = 0; i < materials_length; i++) {
+      var c = material.materials[i].color;
+      material.materials[i] = new THREE.MeshBasicMaterial({
+        color: c
+      });
+    }
+  }
+
+  function setPhong(material) {
+    shading = 'phong';
+    var materials_length = material.materials.length;
+    for (var i = 0; i < materials_length; i++) {
+      var c = material.materials[i].color;
+      material.materials[i] = new THREE.MeshPhongMaterial({
+        color: c,
+        specular: new THREE.Color('black'),
+        emissive: new THREE.Color('black'),
+        shininess: 10
+      });
+    }
+  }
+
+  $('#shading').click(function () {
     if (shading == 'basic') {
+      setPhong(material);
       shading = 'phong';
     }
     else {
+      setBasic(material);
       shading = 'basic';
-    }    console.log(mesh.material.materials[0]);
-    console.log(mesh.material.materials[1]);
+    }
   });
-  
-  $('#open-folder').click(function(e) {
+
+  $('#open-folder').click(function (e) {
     $('#open-folder').hide();
     $finder.fadeIn();
   });
@@ -149,10 +179,16 @@ $(document).ready(function () {
       dataType: 'json',
       timeout: 12000,
       success: function (tree) {
-        tree.state = {'opened': true};
+        tree.state = {
+          'opened': true
+        };
         $finder.on('click', '.jstree-anchor', function (e) {
           $(this).jstree(true).toggle_node(e.target);
-        }).jstree({'core': {'data': tree}});
+        }).jstree({
+          'core': {
+            'data': tree
+          }
+        });
       },
       error: function (e) {
         console.log(e);
@@ -172,6 +208,6 @@ $(document).ready(function () {
   $finder.hide();
   setCSS();
   setRenderer();
-  load(MESH_DIR + '/基礎生物/DNA.js');
+  load(MESH_DIR + '/キャラクター/ひつじ/ゆがみ.js');
   render();
 });
