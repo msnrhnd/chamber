@@ -28,7 +28,7 @@ html {
     position: fixed;
     top: 0;
     #finder {
-      font-size: 18px;
+      @include fontsize(18);
       position: absolute;
       padding: .4em .8em .8em .4em;
       background-color: white;
@@ -91,4 +91,10 @@ footer {
   right: 0;
   text-align: right;
   @include fontsize(12);
+}
+
+@media only screen and (max-width : 640px) {
+  #finder {
+    @include fontsize(24);
+  }
 }

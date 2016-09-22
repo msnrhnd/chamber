@@ -27,8 +27,16 @@ $(document).ready(function () {
       scene.remove(dLight);
       scene.remove(aLight);
     }
-    var manager = new THREE.LoadingManager();
-   var loader = new THREE.JSONLoader();
+    var loader;
+    var ext = path.split('.')[1];
+    switch (ext) {
+    case 'js':
+      loader = new THREE.JSONLoader();
+      break;
+    case 'pdb':
+      loader = new THREE.PDBLoader();
+      break;
+    }
     loader.load(path, createScene);
   }
 
@@ -46,7 +54,14 @@ $(document).ready(function () {
     scene.add(aLight);
     material = new THREE.MeshFaceMaterial(materials);
     mesh = new THREE.Mesh(geometry, material);
-    setBasic(material);
+    switch (shading) {
+    case 'basic':
+      setBasic(material);
+      break;
+    case 'phong':
+      setPhong(material);
+      break;
+    }
     mesh.position.set(-o.x, -o.y, -o.z);
     scene.add(mesh);
     edgeMaterial = new THREE.ShaderMaterial({
@@ -152,13 +167,15 @@ $(document).ready(function () {
   }
 
   $('#shading').click(function () {
-    if (shading == 'basic') {
+    switch (shading) {
+    case 'basic':
       setPhong(material);
       shading = 'phong';
-    }
-    else {
+      break;
+    case 'phong':
       setBasic(material);
       shading = 'basic';
+      break;
     }
   });
 
@@ -208,6 +225,6 @@ $(document).ready(function () {
   $finder.hide();
   setCSS();
   setRenderer();
-  load(MESH_DIR + '/キャラクター/ひつじ/ゆがみ.js');
+  load(MESH_DIR + '/基礎生物/DNA.js');
   render();
 });
