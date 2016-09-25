@@ -5822,35 +5822,32 @@ html {
     position: fixed;
     top: 0; }
     #container #wrapper #finder {
-      font-size: 18px;
-      font-size: 1.125rem;
       position: absolute;
-      padding: .4em .8em .8em .4em;
       background-color: white;
-      opacity: 0.4; }
-      #container #wrapper #finder ul, #container #wrapper #finder li {
+      opacity: .4;
+      padding: .4em; }
+      #container #wrapper #finder ul {
         margin: 0;
-        list-style-type: none;
-        padding-left: .4em; }
-      #container #wrapper #finder ul:first-child {
         padding: 0; }
-        #container #wrapper #finder ul:first-child li {
-          padding: 0; }
-      #container #wrapper #finder i {
-        margin-right: .4em; }
+        #container #wrapper #finder ul li {
+          list-style-type: none;
+          padding-left: .4em; }
+          #container #wrapper #finder ul li i {
+            padding: 0 .4em; }
+          #container #wrapper #finder ul li i:first-child {
+            padding: 0; }
       #container #wrapper #finder a {
         color: black;
         text-decoration: none; }
-    #container #wrapper button {
+    #container #wrapper .button {
+      cursor: pointer;
       position: absolute;
+      padding: 0;
       padding: .4em .8em;
-      background: none;
-      border: none;
-      box-shadow: none;
       color: white; }
-      #container #wrapper button#download {
+      #container #wrapper .button#download {
         right: 0; }
-      #container #wrapper button#shading {
+      #container #wrapper .button#shading {
         bottom: 0; }
 
 h1 {
@@ -5875,8 +5872,10 @@ footer {
   font-size: 0.75rem; }
 
 @media only screen and (max-width: 640px) {
-  #finder {
-    font-size: 24px;
-    font-size: 1.5rem; } }
+  /* #container { */
+  /*   #finder, .button { */
+  /*     @include fontsize(24); */
+  /*   } */
+  /* } */ }
 
 /*# sourceMappingURL=_.css.map */

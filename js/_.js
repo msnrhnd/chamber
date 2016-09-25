@@ -2,9 +2,10 @@ $(document).ready(function () {
   var camera, controls, scene, mesh, edgeMesh, renderer, aLight, dLight, thickness;
   var edgeMaterial, material;
   var EPS = 0.000001;
+  var edgeColor_value = new THREE.Vector4(0, 0, 0, 1);
   var MESH_DIR = 'mesh';
   var side;
-  var shading = 'basic';
+  var shading = 'phong';
   var $wrapper = $('#wrapper');
   var $finder = $('#finder');
 
@@ -17,6 +18,9 @@ $(document).ready(function () {
       height: side,
       left: (w - side) / 2,
       top: (h - side) / 2
+    });
+    $('.button, #finder').css({
+      fontSize: side/16
     });
   }
 
@@ -74,7 +78,7 @@ $(document).ready(function () {
         },
         edgeColor: {
           type: 'v4',
-          value: new THREE.Vector4(0, 0, 0, 1)
+          value: edgeColor_value
         }
       }
     });
@@ -87,6 +91,9 @@ $(document).ready(function () {
   function setCamera(r) {
     camera = new THREE.OrthographicCamera(-r, r, r, -r, -r * 12, r * 12);
     camera.position.set(EPS, 0, 0);
+    // var pLight = new THREE.PointLight('white', 50, r);
+    // pLight.position.set(r,r,r);
+//    camera.add(pLight);
     controls = new THREE.OrbitControls(camera, $wrapper[0]);
   }
 
@@ -97,7 +104,7 @@ $(document).ready(function () {
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(side, side);
-    renderer.setClearColor('lightgray', 1);
+    renderer.setClearColor('white', .8);
     renderer.autoClear = false;
     $wrapper[0].appendChild(renderer.domElement);
   }
@@ -110,6 +117,7 @@ $(document).ready(function () {
     }
     if (edgeMesh) {
       edgeMesh.material.side = THREE.BackSide;
+      edgeMesh.material.uniforms.edgeColor.value = shading == 'basic' ? edgeColor_value : new THREE.Vector4(1, 1, 1, 0);
       edgeMesh.material.uniforms.thickness.value = shading == 'basic' ? thickness / Math.pow(camera.zoom, 1 / 2) : '0';
       renderer.render(scene, camera);
     }
@@ -146,8 +154,12 @@ $(document).ready(function () {
     var materials_length = material.materials.length;
     for (var i = 0; i < materials_length; i++) {
       var c = material.materials[i].color;
+      var o = material.materials[i].opacity;
+      var isTransparent = o < 1 ? true : false;
       material.materials[i] = new THREE.MeshBasicMaterial({
-        color: c
+        color: c,
+        opacity: o,
+        transparent: isTransparent
       });
     }
   }
@@ -157,10 +169,14 @@ $(document).ready(function () {
     var materials_length = material.materials.length;
     for (var i = 0; i < materials_length; i++) {
       var c = material.materials[i].color;
+      var o = material.materials[i].opacity;
+      var isTransparent = o < 1 ? true : false;
       material.materials[i] = new THREE.MeshPhongMaterial({
         color: c,
-        specular: new THREE.Color('black'),
+        specular: new THREE.Color('white'),
         emissive: new THREE.Color('black'),
+        transparent: isTransparent,
+        opacity: o,
         shininess: 10
       });
     }
@@ -225,6 +241,6 @@ $(document).ready(function () {
   $finder.hide();
   setCSS();
   setRenderer();
-  load(MESH_DIR + '/基礎生物/DNA.js');
+  load(MESH_DIR + '/基礎生物/細胞/シンプル細胞.js');
   render();
 });
