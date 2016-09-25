@@ -241,6 +241,6 @@ $(document).ready(function () {
   $finder.hide();
   setCSS();
   setRenderer();
-  load(MESH_DIR + '/基礎生物/細胞/シンプル細胞.js');
+  load(MESH_DIR + '/基礎生物/DNA.js');
   render();
 });
