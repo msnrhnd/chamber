@@ -19,8 +19,9 @@ $(document).ready(function () {
       left: (w - side) / 2,
       top: (h - side) / 2
     });
+    var f = Math.min(side/16, 24);
     $('.button, #finder').css({
-      fontSize: side/16
+      fontSize: f
     });
   }
 
@@ -104,7 +105,7 @@ $(document).ready(function () {
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(side, side);
-    renderer.setClearColor('white', .8);
+    renderer.setClearColor('lightgray');
     renderer.autoClear = false;
     $wrapper[0].appendChild(renderer.domElement);
   }
@@ -241,6 +242,6 @@ $(document).ready(function () {
   $finder.hide();
   setCSS();
   setRenderer();
-  load(MESH_DIR + '/基礎生物/DNA.js');
+  load(MESH_DIR + '/基礎生物/細胞/シンプル細胞.js');
   render();
 });
